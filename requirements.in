@@ -1,0 +1,7 @@
+nats-py==2.10.0
+PyYAML==6.0.2
+aiohttp==3.11.18
+paho-mqtt
+msgpack
+pymodbus
+asyncpg

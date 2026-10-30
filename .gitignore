@@ -1,0 +1,4 @@
+certs/*
+plugins/dnp3/target/*
+Cargo.lock
+__pycache__/*

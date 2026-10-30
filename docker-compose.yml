@@ -1,0 +1,28 @@
+services:
+    
+  natsio:
+    image: nats:latest
+    restart: unless-stopped
+    ports:
+      - 4222:4222
+      # - 8222:8222
+    networks:
+      - usg
+
+  usg:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      target: usg
+    environment:
+      - PYTHONPATH=/code
+    restart: unless-stopped
+    ports:
+      - "20000:20000"
+    networks:
+      - usg
+
+networks:
+  usg:
+    driver: bridge
+    

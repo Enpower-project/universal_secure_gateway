@@ -1,0 +1,103 @@
+usg_id: "59b80f8d-d3ef-4033-abde-143319e3ac41"
+root_topic: "enpower"
+version: 0.1
+
+status:
+  exec: "python3 /code/core/status.py"
+
+# ECMP MQTT broker settings 
+ecmp:
+  host: "example.server.eu"
+  port: 8883
+  username: "example_user"
+  password: "example_secure_pawword"
+  cert: "/etc/ssl/certs/"
+  exec: "python3 /code/plugins/mqtt_north/mqtt_proxy.py"
+
+
+assets:
+  - id: "744b3131-fc8e-4290-b6d6-bfc708e5b340"
+    name: "BSS1"
+    type: "BSS"
+    driver: "generic_bss"
+    exec: "python3 /code/drivers/generic_bss/asset.py"
+    device_interface: 
+      type: "rest" 
+      config:
+        url:  ""
+        user: ""
+        password: ""  
+    device_config:
+      soc: 0.0 
+      capacity: 110000.0 
+      max_charge_power: 16000.0
+      max_discharge_power: 16000.0
+      charge_efficiency: 0.95
+      discharge_efficiency: 0.95
+    polling_interval: 5
+    topics:
+      status: 
+        - "status"
+      telemetry: 
+        - "active_power"
+        - "soc"
+      control: 
+        - "active_power"
+
+
+plugins:
+  - id: "bss1_dnp3"
+    name: "bss1_dnp3"
+    type: "DNP3"
+    app: "dnp3-usg-north"
+    exec: "/code/plugins/dnp3/dnp3-usg-north"
+    config:
+      # TCP endpoint the outstation will bind to (exposed to the DNP3 master)
+      listen_addr: "0.0.0.0:20000"
+      # DNP3 link-layer addresses (master ↔ outstation)
+      link:
+        destination: 100  # outstation's address
+        source: 101       # expected master address
+      # Enable unsolicited events?
+      unsolicited: true
+      points:
+        analog_inputs: []
+        analog_outputs: []
+        binary_inputs: []
+        binary_outputs: []
+        counters: []
+      # Map telemetry channels to DNP3 database indices
+      mapping:
+        binary_inputs: []
+        analog_inputs:
+          - { index: 48, subject: "744b3131-fc8e-4290-b6d6-bfc708e5b340.telemetry.state_of_charge", scale: 10.0, min: 0.0, max: 1000.0, unit: "%" }
+        counters: []
+      controls:
+        crob: 
+          - { index: 18, subject: "744b3131-fc8e-4290-b6d6-bfc708e5b340.control.enable_charge_discharge_mode", unit: "bool" }
+        ao16: []
+        ao32:
+          - { index: 93, subject: "744b3131-fc8e-4290-b6d6-bfc708e5b340.control.charge_discharge_active_power_target", min: -1000.0, max: 1000.0, unit: "%ref" }
+      # NATS connection
+      nats:
+        url: "nats://natsio:4222"
+
+  - id: "clock"
+    name: "clock"
+    type: "clock"
+    app: "main"
+    exec: "python3 /code/plugins/clock/main.py"
+    config:
+      # tick frequency in seconds
+      tick: 1
+      # timestamp step in seconds
+      timestep: 900
+      start_datetime: "2026-09-29T22:00:00"
+      end_datetime: "2026-09-30T22:00:00"  
+  
+
+ 
+      
+
+
+
